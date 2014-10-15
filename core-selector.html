@@ -66,7 +66,7 @@ Fired when an item element is tapped.
 <link rel="import" href="../core-selection/core-selection.html">
 
 <polymer-element name="core-selector"
-    attributes="selected multi valueattr selectedClass selectedProperty selectedAttribute selectedItem selectedModel selectedIndex notap excludedLocalNames target itemsSelector activateEvent">
+    attributes="selected multi valueattr selectedClass selectedProperty selectedAttribute selectedItem selectedModel selectedIndex notap excludedLocalNames target itemsSelector activateEvent values">
 
   <template>
     <core-selection id="selection" multi="{{multi}}" on-core-select="{{selectionSelect}}"></core-selection>
@@ -127,6 +127,14 @@ Fired when an item element is tapped.
        * @default 'name'
        */
       valueattr: 'name',
+
+      /**
+       * @attribute values
+       * @type Array.<string>
+       * @default []
+       * @readonly
+       */
+      values: [],
 
       /**
        * Specifies the CSS class to be used to add to the selected element.
@@ -273,10 +281,16 @@ Fired when an item element is tapped.
         this.activateListener = this.activateHandler.bind(this);
         this.itemFilter = this.filterItem.bind(this);
         this.excludedLocalNamesChanged();
-        this.observer = new MutationObserver(this.updateSelected.bind(this));
+        this.observer = new MutationObserver(this.elementMutated.bind(this));
         if (!this.target) {
           this.target = this;
         }
+        this.updateValues();
+      },
+
+      elementMutated: function() {
+        this.updateSelected();
+        this.updateValues();
       },
 
       /**
@@ -420,25 +434,26 @@ Fired when an item element is tapped.
         this.selectedIndex = this.selectedItem ? 
             parseInt(this.valueToIndex(this.selected)) : -1;
       },
-      
+
+      updateValues: function() {
+        this.values = this.items.map(function(item) {
+          return this.valueForNode(item);
+        }.bind(this));
+      },
+
+      valueForNode: function(node) {
+        return node[this.valueattr] || node.getAttribute(this.valueattr);
+      },
+
       valueToItem: function(value) {
         return (value === null || value === undefined) ? 
             null : this.items[this.valueToIndex(value)];
       },
 
       valueToIndex: function(value) {
-        // find an item with value == value and return it's index
-        for (var i=0, items=this.items, c; (c=items[i]); i++) {
-          if (this.valueForNode(c) == value) {
-            return i;
-          }
-        }
+        var index = this.values.indexOf(value);
         // if no item found, the value itself is probably the index
-        return value;
-      },
-
-      valueForNode: function(node) {
-        return node[this.valueattr] || node.getAttribute(this.valueattr);
+        return index >= 0 ? index : value;
       },
 
       // events fired from <core-selection> object

@@ -1,0 +1,53 @@
+<!doctype html>
+<!--
+Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="../../webcomponentsjs/webcomponents.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../core-selector.html">
+
+  <style>
+    .core-selected {
+      background: #ccc;
+    }
+  </style>
+
+</head>
+<body>
+
+  <core-selector id="selector" valueattr="key">
+    <div key="a">Item 1</div>
+    <div key="b">Item 2</div>
+    <div key="c">Item 3</div>
+    <div key="d">Item 4</div>
+    <div key="e">Item 5</div>
+  </core-selector>
+
+  <script>
+    var selector = document.getElementById('selector');
+
+    test('supports selection by value', function(done) {
+      selector.selected = 'c';
+      asyncPlatformFlush(function() {
+        assert.equal(selector.selectedIndex, 2);
+        done();
+      });
+    });
+
+    test('exposes values in order', function() {
+      assert.deepEqual(selector.values, ['a', 'b', 'c', 'd', 'e']);
+    });
+
+  </script>
+
+</body>
+</html>
